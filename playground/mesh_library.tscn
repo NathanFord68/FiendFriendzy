@@ -33,7 +33,7 @@ data = PackedVector3Array(-0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0
 [node name="MeshLibrary" type="Node3D"]
 
 [node name="Water" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.39774)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4.38301)
 mesh = SubResource("BoxMesh_oofgm")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Water"]
