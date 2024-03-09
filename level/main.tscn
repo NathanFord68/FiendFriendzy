@@ -7,7 +7,7 @@
 [node name="Main" type="Node3D"]
 
 [node name="player" parent="." instance=ExtResource("1_1pxvr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4755, 5.54983, -4.04709)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4755, 13.8678, -4.04709)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.184275, -0.0459244, 0.981801, -0.0917596, 0.993741, 0.0637054, -0.978582, -0.101829, 0.178908, 26.8671, 3.31953, 0.0728378)
@@ -19,7 +19,7 @@ data = {
 }
 
 [node name="Melee" parent="." instance=ExtResource("3_px5s6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.39191, 3.21221, -1.09602)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.38634, 3.22032, -1.09277)
 
 [node name="Melee2" parent="." instance=ExtResource("3_px5s6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.39191, 3.21221, -3.71535)

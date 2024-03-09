@@ -49,11 +49,18 @@ func handle_mouse_click():
 	# Detect collisions and get troops
 	var space_state = get_world_3d().direct_space_state
 	var trace = space_state.intersect_ray(PhysicsRayQueryParameters3D.create(f, t))
-	selected_troop = trace.collider
+	
+	if !!selected_troop:
+		# hide indiciator on previous troop
+		selected_troop.get_node("%SelectionIndicator").hide()
+		
+	if !!trace.collider:
+		# Reasign troop
+		selected_troop = trace.collider
 	
 	# Short 
 	if selected_troop == null:
 		return
 	
-	print(selected_troop.position)
+	selected_troop.get_node("%SelectionIndicator").show()
 	
