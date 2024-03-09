@@ -1,9 +1,11 @@
 extends Node3D
 
+enum MODE 	{ MOVE, ATTACK, ITEM }
+
 var direction : Vector3 = Vector3()
 var camera_speed : float = .5
 var camera : Camera3D = null
-
+var selected_mode : MODE = MODE.MOVE
 @export var raycast_length : float = 1000
 
 var selected_troop : CharacterBody3D = null
@@ -22,6 +24,7 @@ func _input(event):
 
 func _physics_process(delta):
 	if Input.is_action_just_pressed("player_click"):
+		print("Bamm")
 		handle_mouse_click()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -74,14 +77,30 @@ func handle_troop_select(troop : CharacterBody3D):
 	selected_troop = troop
 	
 	selected_troop.get_node("%SelectionIndicator").show()
+	get_node("%ModeSelect").show()
 	
 func handle_grid_select(grid : GridMap, select_pos: Vector3):
+	if selected_troop == null:
+		return
 	
-	#Translate selected troop to coordinate
-	if selected_troop != null:
-		var move : Vector3 = grid.map_to_local(grid.local_to_map(select_pos)) - grid.map_to_local(grid.local_to_map(selected_troop.position)) 
-		move.y = 0
-		
-		selected_troop.translate(move + Vector3(2, 0, 2))
-	# Get the center location of the mesh
-	# Move character to center
+	match selected_mode:
+		MODE.MOVE:
+			# Translate selected troop to coordinate
+			var move : Vector3 = grid.map_to_local(grid.local_to_map(select_pos)) - grid.map_to_local(grid.local_to_map(selected_troop.position)) 
+			move.y = 0
+			
+			selected_troop.translate(move + Vector3(2, 0, 2))
+		MODE.ATTACK:
+			print("We're attacking")
+		MODE.ITEM:
+			print("We're using items")
+
+
+func _on_move_button_down():
+	selected_mode = MODE.MOVE
+
+func _on_attack_button_down():
+	selected_mode = MODE.ATTACK
+
+func _on_item_button_down():
+	selected_mode = MODE.ITEM
