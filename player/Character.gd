@@ -4,20 +4,30 @@ enum MODE 	{ UNSELECTED, MOVE, ATTACK, ITEM }
 
 var direction : Vector3 = Vector3()
 var camera_speed : float = .5
-var camera : Camera3D = null
 
 var selected_mode : MODE = MODE.UNSELECTED
 @export var raycast_length : float = 1000
 
 var selected_troop : CharacterBody3D = null
 
+# Peer id.
+@export var peer_id : int : 
+	set(value):
+		peer_id = value
+		name = str(peer_id)
+		set_multiplayer_authority(peer_id)
+
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	# Set local camera.
+	$Camera3D.current = peer_id == multiplayer.get_unique_id()
+	# Set process functions for current player.
+	var is_local = is_multiplayer_authority()
+	set_process_input(is_local)
+	set_physics_process(is_local)
+	set_process(is_local)
 	
-	# Get the camera
-	camera = get_node("SpringArm3D/Camera3D")
-	if camera == null:
-		push_error("Could not find camera")
 
 func _input(event):
 	pass
@@ -51,8 +61,8 @@ func handle_mouse_click():
 	var mouse_pos = get_viewport().get_mouse_position()
 	
 	# Ray cast out from mouse position
-	var f = camera.project_ray_origin(mouse_pos)
-	var t = f + camera.project_ray_normal(mouse_pos) * raycast_length
+	var f = $Camera3D.project_ray_origin(mouse_pos)
+	var t = f + $Camera3D.project_ray_normal(mouse_pos) * raycast_length
 	
 	# Detect collisions and get troops
 	var space_state = get_world_3d().direct_space_state
