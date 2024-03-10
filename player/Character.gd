@@ -70,6 +70,12 @@ func handle_mouse_click():
 	
 
 func handle_troop_select(troop : CharacterBody3D):
+	if !!selected_troop && (
+		troop.get_parent_node_3d().team != selected_troop.get_parent_node_3d().team
+	):
+		handle_enemy_select(troop)
+		return
+	
 	if !!selected_troop && troop.get_rid() == selected_troop.get_rid():
 		return
 	
@@ -88,33 +94,44 @@ func handle_troop_select(troop : CharacterBody3D):
 	selected_mode = MODE.UNSELECTED
 	get_node("%ModeSelect").show()
 	
-func handle_grid_select(grid : GridMap, select_pos: Vector3):
-	if selected_troop == null:
+func handle_enemy_select(enemy_troop : CharacterBody3D):
+	print_debug("Entering handle_enemy_select")
+	print_debug(!!selected_troop)
+	print_debug(selected_mode)
+	if !selected_troop:
 		return
+	
+	if selected_mode == MODE.ATTACK:
+		enemy_troop.health -= selected_troop.attack_damage
+	
+		# Clean up from attack
+		selected_troop.can_attack = false
+		handle_grid_highlight(-1, selected_troop.attack_range)
+		selected_mode = MODE.UNSELECTED
 		
-	match selected_mode:
-		MODE.MOVE:
-			# Translate selected troop to coordinate
-			var troop_map_pos = grid.local_to_map(selected_troop.position)
-			var move : Vector3 = grid.map_to_local(grid.local_to_map(select_pos)) - grid.map_to_local(troop_map_pos) 
-			move.y = 0
+		
 
-			if _check_range(move, troop_map_pos, selected_troop.move_range):
-				# Dehighlight selected squares
-				handle_grid_highlight(-1, selected_troop.move_range)
-				
-				# Move the troop
-				selected_troop.translate(move)
-				
-				# Toggle the troops ability to move off
-				selected_troop.can_move = false
-				selected_mode = MODE.UNSELECTED
-				
-		MODE.ATTACK:
-			
-			print("We're attacking")
-		MODE.ITEM:
-			print("We're using items")
+# TODO make sure no one else is standing there
+func handle_grid_select(grid : GridMap, select_pos: Vector3):
+	if !selected_troop:
+		return
+
+	# Translate selected troop to coordinate
+	var troop_map_pos = grid.local_to_map(selected_troop.position)
+	var move : Vector3 = grid.map_to_local(grid.local_to_map(select_pos)) - grid.map_to_local(troop_map_pos) 
+	move.y = 0
+
+	if _check_range(move, troop_map_pos, selected_troop.move_range):
+		# Dehighlight selected squares
+		handle_grid_highlight(-1, selected_troop.move_range)
+		
+		# Move the troop
+		selected_troop.translate(move)
+		
+		# Toggle the troops ability to move off
+		selected_troop.can_move = false
+		selected_mode = MODE.UNSELECTED
+
 
 
 func _on_move_button_down():
