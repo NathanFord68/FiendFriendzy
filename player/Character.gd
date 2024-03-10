@@ -95,9 +95,6 @@ func handle_troop_select(troop : CharacterBody3D):
 	get_node("%ModeSelect").show()
 	
 func handle_enemy_select(enemy_troop : CharacterBody3D):
-	print_debug("Entering handle_enemy_select")
-	print_debug(!!selected_troop)
-	print_debug(selected_mode)
 	if !selected_troop:
 		return
 	
