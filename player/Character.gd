@@ -114,15 +114,16 @@ func handle_grid_select(grid : GridMap, select_pos: Vector3):
 
 	# Translate selected troop to coordinate
 	var troop_map_pos = grid.local_to_map(selected_troop.position)
-	var move : Vector3 = grid.map_to_local(grid.local_to_map(select_pos)) - grid.map_to_local(troop_map_pos) 
-	move.y = 0
+	#var move : Vector3 = grid.map_to_local(grid.local_to_map(select_pos)) - grid.map_to_local(troop_map_pos) 
+	var move : Vector3 = grid.map_to_local(grid.local_to_map(select_pos))
+	move.y = 3
 
 	if _check_range(move, troop_map_pos, selected_troop.move_range):
 		# Dehighlight selected squares
 		handle_grid_highlight(-1, selected_troop.move_range)
 		
 		# Move the troop
-		selected_troop.translate(move)
+		selected_troop.global_position = move
 		
 		# Toggle the troops ability to move off
 		selected_troop.can_move = false
