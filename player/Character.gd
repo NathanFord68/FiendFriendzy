@@ -28,6 +28,7 @@ func _physics_process(delta):
 		handle_mouse_click()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
+# TODO add camera controls
 func _process(delta):
 	# Get player input wasd/arrows
 	if Input.is_action_pressed("player_left"):
@@ -69,14 +70,22 @@ func handle_mouse_click():
 	
 
 func handle_troop_select(troop : CharacterBody3D):
+	if !!selected_troop && troop.get_rid() == selected_troop.get_rid():
+		return
+	
 	if !!selected_troop:
 		# hide indiciator on previous troop
 		selected_troop.get_node("%SelectionIndicator").hide()
+	
+	if !!selected_troop && ( 
+		selected_mode == MODE.ATTACK || selected_mode== MODE.MOVE ):
+		handle_grid_highlight(-1, selected_troop.attack_range if selected_mode == MODE.ATTACK else selected_troop.move_range)
 	
 	# Reasign troop
 	selected_troop = troop
 	
 	selected_troop.get_node("%SelectionIndicator").show()
+	selected_mode = MODE.UNSELECTED
 	get_node("%ModeSelect").show()
 	
 func handle_grid_select(grid : GridMap, select_pos: Vector3):
