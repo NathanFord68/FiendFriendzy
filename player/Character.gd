@@ -25,7 +25,6 @@ func _input(event):
 
 func _physics_process(delta):
 	if Input.is_action_just_pressed("player_click"):
-		print("Bamm")
 		handle_mouse_click()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -87,18 +86,37 @@ func handle_grid_select(grid : GridMap, select_pos: Vector3):
 	match selected_mode:
 		MODE.MOVE:
 			# Translate selected troop to coordinate
-			var move : Vector3 = grid.map_to_local(grid.local_to_map(select_pos)) - grid.map_to_local(grid.local_to_map(selected_troop.position)) 
+			var troop_map_pos = grid.local_to_map(selected_troop.position)
+			var move : Vector3 = grid.map_to_local(grid.local_to_map(select_pos)) - grid.map_to_local(troop_map_pos) 
 			move.y = 0
-			
-			selected_troop.translate(move + Vector3(2, 0, 2))
+
+			if _check_range(move, troop_map_pos, selected_troop.move_range):
+				# Dehighlight selected squares
+				handle_grid_highlight(-1, selected_troop.move_range)
+				
+				# Move the troop
+				selected_troop.translate(move)
+				
+				# Toggle the troops ability to move off
+				selected_troop.can_move = false
+				selected_mode = MODE.UNSELECTED
+				
 		MODE.ATTACK:
+			
 			print("We're attacking")
 		MODE.ITEM:
 			print("We're using items")
 
 
-# TODO handle 
 func _on_move_button_down():
+	# Check if troop can move
+	if !selected_troop.can_move:
+		return
+
+	# De-highlight squares if we're coming from an attack mode
+	if selected_mode == MODE.ATTACK:
+		handle_grid_highlight(-1, selected_troop.attack_range)
+
 	# Change the mode
 	selected_mode = MODE.MOVE
 	
@@ -106,13 +124,22 @@ func _on_move_button_down():
 	handle_grid_highlight(1, selected_troop.move_range)
 
 func _on_attack_button_down():
+	# Check if the troop can attack
+	if !selected_troop.can_attack:
+		return
+	
+	# De-highlight if we're coming from movement
+	if selected_mode == MODE.MOVE:
+		handle_grid_highlight(-1, selected_troop.move_range)
+		
+	# Set the mode to attack
 	selected_mode = MODE.ATTACK
+	handle_grid_highlight(1, selected_troop.attack_range)
 
 func _on_item_button_down():
 	selected_mode = MODE.ITEM
 	
 func handle_grid_highlight(mesh_increment : int, range : int):
-	# Highlight squares we can move to
 	# Cast out to get reference to grid
 	var space_state = get_world_3d().direct_space_state
 	var prqp = PhysicsShapeQueryParameters3D.new()
@@ -123,7 +150,6 @@ func handle_grid_highlight(mesh_increment : int, range : int):
 	
 	var trace = space_state.intersect_shape(prqp, 1)[0]	
 	
-	print(trace)
 	if "collider" not in trace:
 		push_error("Nothing found on shape trace from troop movement mode change")
 		return
@@ -141,4 +167,12 @@ func handle_grid_highlight(mesh_increment : int, range : int):
 	for i in range(0 - range, range):
 		for j in range(0 - range, range):
 			var c = standing_grid + Vector3i(i, 0, j)
-			grid.set_cell_item(c, grid.get_cell_item(c) + 1)
+			grid.set_cell_item(c, grid.get_cell_item(c) + mesh_increment)
+			
+func _check_range(to, from, range):
+	return !( 
+				to.x >= from.x + range ||
+				to.x <= from.x - range ||
+				to.y >= from.y + range ||
+				to.y <= from.y - range
+			)
