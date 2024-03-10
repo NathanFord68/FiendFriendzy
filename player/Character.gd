@@ -97,7 +97,16 @@ func handle_grid_select(grid : GridMap, select_pos: Vector3):
 
 
 func _on_move_button_down():
+	# Change the mode
 	selected_mode = MODE.MOVE
+	
+	## Highlight squares we can move to
+	# Get troop position
+	var standing_pos : Vector3 = selected_troop.position
+	# Get grid square they are standing on
+	#var standing_square : Vector3 = GridMap.
+	# Get an array of squares so far out 
+	# Iterate through and increase the emmision
 
 func _on_attack_button_down():
 	selected_mode = MODE.ATTACK
