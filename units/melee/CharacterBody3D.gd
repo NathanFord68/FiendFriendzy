@@ -8,3 +8,10 @@ extends CharacterBody3D
 
 var can_move = true
 var can_attack = true
+
+func take_damage(attacking_troop : CharacterBody3D):
+	self.health -= attacking_troop.attack_damage
+	
+	if health <= 0:
+		self.queue_free()
+		print(str(self.get_rid())+ " has died")

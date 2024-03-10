@@ -102,13 +102,12 @@ func handle_enemy_select(enemy_troop : CharacterBody3D):
 		return
 	
 	if selected_mode == MODE.ATTACK:
-		enemy_troop.health -= selected_troop.attack_damage
+		enemy_troop.take_damage(selected_troop)
 	
 		# Clean up from attack
 		selected_troop.can_attack = false
 		handle_grid_highlight(-1, selected_troop.attack_range)
 		selected_mode = MODE.UNSELECTED
-		
 		
 
 # TODO make sure no one else is standing there
