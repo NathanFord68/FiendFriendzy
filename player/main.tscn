@@ -9,7 +9,7 @@ rotation_edit_mode = 2
 script = ExtResource("1_0o48o")
 
 [node name="SpringArm3D" type="SpringArm3D" parent="Character"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 10, 0)
+transform = Transform3D(1, 0, 0, 0, -0.00352561, -0.999994, 0, 0.999994, -0.00352561, 0, 10, 0)
 spring_length = 10.0
 margin = 0.4
 
@@ -18,3 +18,39 @@ transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0)
 rotation_edit_mode = 2
 fov = 100.0
 near = 1.0
+
+[node name="ModeSelect" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+offset_right = 204.0
+offset_bottom = 233.0
+
+[node name="Panel" type="Panel" parent="ModeSelect"]
+layout_mode = 2
+
+[node name="Move" type="Button" parent="ModeSelect/Panel"]
+layout_mode = 2
+offset_right = 204.0
+offset_bottom = 56.0
+text = "Move
+"
+
+[node name="Attack" type="Button" parent="ModeSelect/Panel"]
+layout_mode = 2
+offset_left = -1.0
+offset_top = 77.0
+offset_right = 204.0
+offset_bottom = 154.0
+text = "Attack"
+
+[node name="Item" type="Button" parent="ModeSelect/Panel"]
+layout_mode = 2
+offset_left = 2.0
+offset_top = 160.0
+offset_right = 204.0
+offset_bottom = 235.0
+text = "Item"
+
+[connection signal="button_down" from="ModeSelect/Panel/Move" to="Character" method="_on_move_button_down"]
+[connection signal="button_down" from="ModeSelect/Panel/Attack" to="Character" method="_on_attack_button_down"]
+[connection signal="button_down" from="ModeSelect/Panel/Item" to="Character" method="_on_item_button_down"]
