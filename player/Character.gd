@@ -1,11 +1,12 @@
 extends Node3D
 
-enum MODE 	{ MOVE, ATTACK, ITEM }
+enum MODE 	{ UNSELECTED, MOVE, ATTACK, ITEM }
 
 var direction : Vector3 = Vector3()
 var camera_speed : float = .5
 var camera : Camera3D = null
-var selected_mode : MODE = MODE.MOVE
+
+var selected_mode : MODE = MODE.UNSELECTED
 @export var raycast_length : float = 1000
 
 var selected_troop : CharacterBody3D = null
@@ -82,7 +83,7 @@ func handle_troop_select(troop : CharacterBody3D):
 func handle_grid_select(grid : GridMap, select_pos: Vector3):
 	if selected_troop == null:
 		return
-	
+		
 	match selected_mode:
 		MODE.MOVE:
 			# Translate selected troop to coordinate
@@ -96,20 +97,48 @@ func handle_grid_select(grid : GridMap, select_pos: Vector3):
 			print("We're using items")
 
 
+# TODO handle 
 func _on_move_button_down():
 	# Change the mode
 	selected_mode = MODE.MOVE
 	
-	## Highlight squares we can move to
-	# Get troop position
-	var standing_pos : Vector3 = selected_troop.position
-	# Get grid square they are standing on
-	#var standing_square : Vector3 = GridMap.
-	# Get an array of squares so far out 
-	# Iterate through and increase the emmision
+	# Highlight squares
+	handle_grid_highlight(1, selected_troop.move_range)
 
 func _on_attack_button_down():
 	selected_mode = MODE.ATTACK
 
 func _on_item_button_down():
 	selected_mode = MODE.ITEM
+	
+func handle_grid_highlight(mesh_increment : int, range : int):
+	# Highlight squares we can move to
+	# Cast out to get reference to grid
+	var space_state = get_world_3d().direct_space_state
+	var prqp = PhysicsShapeQueryParameters3D.new()
+	prqp.exclude = [selected_troop.get_rid()]
+	prqp.shape = SphereShape3D.new()
+	prqp.shape.radius = 2
+	prqp.transform = selected_troop.global_transform
+	
+	var trace = space_state.intersect_shape(prqp, 1)[0]	
+	
+	print(trace)
+	if "collider" not in trace:
+		push_error("Nothing found on shape trace from troop movement mode change")
+		return
+	
+	if not (trace.collider is GridMap):
+		push_error("Reference to gridmap not obtained")
+		return
+		
+	var grid : GridMap = trace.collider
+		
+	# Get grid square they are standing on
+	var standing_grid = grid.local_to_map(Vector3(selected_troop.global_position.x, 1, selected_troop.global_position.z))
+	
+	# Iterate through and increase the emmision
+	for i in range(0 - range, range):
+		for j in range(0 - range, range):
+			var c = standing_grid + Vector3i(i, 0, j)
+			grid.set_cell_item(c, grid.get_cell_item(c) + 1)
