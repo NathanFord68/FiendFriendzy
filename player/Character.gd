@@ -131,12 +131,9 @@ func handle_grid_select(grid : GridMap, select_pos: Vector3):
 	if _check_range(move, troop_map_pos, selected_troop.move_range):
 		# Dehighlight selected squares
 		handle_grid_highlight(-1, selected_troop.move_range)
+
+		Server.update_troop_location.rpc_id(1, selected_troop.get_parent().name, move)
 		
-		# Move the troop
-		selected_troop.global_position = move
-		
-		# Toggle the troops ability to move off
-		selected_troop.can_move = false
 		selected_mode = MODE.UNSELECTED
 
 

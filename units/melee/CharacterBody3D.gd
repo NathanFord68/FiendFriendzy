@@ -8,6 +8,7 @@ extends CharacterBody3D
 @export var can_move 			= true
 @export var can_attack 			= true
 
+
 func take_damage(attacking_troop : CharacterBody3D):
 	self.health -= attacking_troop.attack_damage
 	
