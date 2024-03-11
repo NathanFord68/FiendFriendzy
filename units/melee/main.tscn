@@ -2,14 +2,6 @@
 
 [ext_resource type="Script" path="res://units/melee/CharacterBody3D.gd" id="1_ew4af"]
 
-[sub_resource type="GDScript" id="GDScript_40io3"]
-script/source = "extends Node3D
-
-enum TEAM { BLUE, RED }
-
-@export var team : TEAM = TEAM.RED
-"
-
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_2qjqa"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_i3jwp"]
@@ -23,12 +15,31 @@ material = SubResource("StandardMaterial3D_rskkp")
 
 [sub_resource type="PrismMesh" id="PrismMesh_n78ur"]
 
-[node name="Main" type="Node3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.356778, 0)
-script = SubResource("GDScript_40io3")
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_6atg2"]
+properties/0/path = NodePath("CharacterBody3D:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath("CharacterBody3D:health")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath("CharacterBody3D:can_move")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+properties/3/path = NodePath("CharacterBody3D:can_attack")
+properties/3/spawn = true
+properties/3/replication_mode = 1
+properties/4/path = NodePath("CharacterBody3D:peer_id")
+properties/4/spawn = true
+properties/4/replication_mode = 0
+
+[node name="Node3D" type="Node3D"]
 
 [node name="CharacterBody3D" type="CharacterBody3D" parent="."]
 script = ExtResource("1_ew4af")
+health = null
+move_range = null
+attack_range = null
+attack_damage = null
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
 mesh = SubResource("CapsuleMesh_2qjqa")
@@ -48,3 +59,6 @@ mesh = SubResource("CylinderMesh_texru")
 [node name="ArrowHead" type="MeshInstance3D" parent="CharacterBody3D/SelectionIndicator"]
 transform = Transform3D(-0.25, 3.7749e-08, 0, -3.7749e-08, -0.25, 0, 0, 0, 0.0333121, 0, 0, 0)
 mesh = SubResource("PrismMesh_n78ur")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_6atg2")
