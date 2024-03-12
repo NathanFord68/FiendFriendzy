@@ -1,33 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://bwq4c1ecavn7k"]
+[gd_scene format=3 uid="uid://cci2qbndamu88"]
 
-[ext_resource type="Script" path="res://main.gd" id="1_a3oor"]
+[node name="Main" type="Node"]
 
-[node name="main" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1_a3oor")
-
-[node name="Play" type="Button" parent="."]
-layout_mode = 0
-offset_left = 499.0
-offset_top = 118.0
-offset_right = 702.0
-offset_bottom = 232.0
-text = "Play
-"
-
-[node name="Exit" type="Button" parent="."]
-layout_mode = 0
-offset_left = 500.0
-offset_top = 318.0
-offset_right = 703.0
-offset_bottom = 432.0
-text = "Exit
-"
-
-[connection signal="pressed" from="Play" to="." method="_on_play_pressed"]
-[connection signal="pressed" from="Exit" to="." method="_on_exit_pressed"]
+[node name="Players" type="Node" parent="."]
+unique_name_in_owner = true

@@ -4,20 +4,30 @@ enum MODE 	{ UNSELECTED, MOVE, ATTACK, ITEM }
 
 var direction : Vector3 = Vector3()
 var camera_speed : float = .5
-var camera : Camera3D = null
 
 var selected_mode : MODE = MODE.UNSELECTED
 @export var raycast_length : float = 1000
 
 var selected_troop : CharacterBody3D = null
 
+# Peer id.
+@export var peer_id : int : 
+	set(value):
+		peer_id = value
+		name = str(peer_id)
+		set_multiplayer_authority(peer_id)
+
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	# Set local camera.
+	$Camera3D.current = peer_id == multiplayer.get_unique_id()
+	# Set process functions for current player.
+	var is_local = is_multiplayer_authority()
+	set_process_input(is_local)
+	set_physics_process(is_local)
+	set_process(is_local)
 	
-	# Get the camera
-	camera = get_node("SpringArm3D/Camera3D")
-	if camera == null:
-		push_error("Could not find camera")
 
 func _input(event):
 	pass
@@ -51,8 +61,8 @@ func handle_mouse_click():
 	var mouse_pos = get_viewport().get_mouse_position()
 	
 	# Ray cast out from mouse position
-	var f = camera.project_ray_origin(mouse_pos)
-	var t = f + camera.project_ray_normal(mouse_pos) * raycast_length
+	var f = $Camera3D.project_ray_origin(mouse_pos)
+	var t = f + $Camera3D.project_ray_normal(mouse_pos) * raycast_length
 	
 	# Detect collisions and get troops
 	var space_state = get_world_3d().direct_space_state
@@ -71,7 +81,7 @@ func handle_mouse_click():
 
 func handle_troop_select(troop : CharacterBody3D):
 	if !!selected_troop && (
-		troop.get_parent_node_3d().team != selected_troop.get_parent_node_3d().team
+		troop.attributes.owning_player != selected_troop.attributes.owning_player
 	):
 		handle_enemy_select(troop)
 		return
@@ -85,7 +95,7 @@ func handle_troop_select(troop : CharacterBody3D):
 	
 	if !!selected_troop && ( 
 		selected_mode == MODE.ATTACK || selected_mode== MODE.MOVE ):
-		handle_grid_highlight(-1, selected_troop.attack_range if selected_mode == MODE.ATTACK else selected_troop.move_range)
+		handle_grid_highlight(-1, selected_troop.attributes.attack_range if selected_mode == MODE.ATTACK else selected_troop.attributes.move_range)
 	
 	# Reasign troop
 	selected_troop = troop
@@ -98,13 +108,15 @@ func handle_enemy_select(enemy_troop : CharacterBody3D):
 	if !selected_troop:
 		return
 	
-	if selected_mode == MODE.ATTACK:
-		enemy_troop.take_damage(selected_troop)
+	if selected_mode != MODE.ATTACK:
+		return
 	
-		# Clean up from attack
-		selected_troop.can_attack = false
-		handle_grid_highlight(-1, selected_troop.attack_range)
-		selected_mode = MODE.UNSELECTED
+	enemy_troop.take_damage(selected_troop)
+
+	# Clean up from attack
+	selected_troop.can_attack = false
+	handle_grid_highlight(-1, selected_troop.attributes.attack_range)
+	selected_mode = MODE.UNSELECTED
 		
 
 # TODO make sure no one else is standing there
@@ -118,48 +130,49 @@ func handle_grid_select(grid : GridMap, select_pos: Vector3):
 	var move : Vector3 = grid.map_to_local(grid.local_to_map(select_pos))
 	move.y = 3
 
-	if _check_range(move, troop_map_pos, selected_troop.move_range):
+	if _check_range(move, troop_map_pos, selected_troop.attributes.move_range):
 		# Dehighlight selected squares
-		handle_grid_highlight(-1, selected_troop.move_range)
+		handle_grid_highlight(-1, selected_troop.attributes.move_range)
+
+		Server.update_troop_location.rpc_id(1, selected_troop.name, move, selected_troop.peer_id)
 		
-		# Move the troop
-		selected_troop.global_position = move
-		
-		# Toggle the troops ability to move off
-		selected_troop.can_move = false
 		selected_mode = MODE.UNSELECTED
 
-
-
 func _on_move_button_down():
+	if selected_mode == MODE.MOVE:
+		return 
 	# Check if troop can move
 	if !selected_troop.can_move:
 		return
 
 	# De-highlight squares if we're coming from an attack mode
 	if selected_mode == MODE.ATTACK:
-		handle_grid_highlight(-1, selected_troop.attack_range)
+		handle_grid_highlight(-1, selected_troop.attributes.attack_range)
 
 	# Change the mode
 	selected_mode = MODE.MOVE
 	
 	# Highlight squares
-	handle_grid_highlight(1, selected_troop.move_range)
+	handle_grid_highlight(1, selected_troop.attributes.move_range)
 
 func _on_attack_button_down():
+	if selected_mode == MODE.ATTACK:
+		return 
 	# Check if the troop can attack
 	if !selected_troop.can_attack:
 		return
 	
 	# De-highlight if we're coming from movement
 	if selected_mode == MODE.MOVE:
-		handle_grid_highlight(-1, selected_troop.move_range)
+		handle_grid_highlight(-1, selected_troop.attributes.move_range)
 		
 	# Set the mode to attack
 	selected_mode = MODE.ATTACK
-	handle_grid_highlight(1, selected_troop.attack_range)
+	handle_grid_highlight(1, selected_troop.attributes.attack_range)
 
 func _on_item_button_down():
+	if selected_mode == MODE.ITEM:
+		return
 	selected_mode = MODE.ITEM
 	
 func handle_grid_highlight(mesh_increment : int, range : int):

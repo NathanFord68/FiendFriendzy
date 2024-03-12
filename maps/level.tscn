@@ -1,13 +1,16 @@
 [gd_scene load_steps=4 format=3 uid="uid://djxujyshgjbpp"]
 
-[ext_resource type="PackedScene" uid="uid://c7cx0ibtswkwt" path="res://player/main.tscn" id="1_1pxvr"]
 [ext_resource type="MeshLibrary" uid="uid://bolajffj0ig0a" path="res://playground/mesh_library.tres" id="2_eben8"]
-[ext_resource type="PackedScene" uid="uid://olw4xcu4dndf" path="res://units/melee/main.tscn" id="3_px5s6"]
+[ext_resource type="PackedScene" uid="uid://olw4xcu4dndf" path="res://units/melee/main.tscn" id="2_lki5v"]
+
+[sub_resource type="GDScript" id="GDScript_wanib"]
+script/source = "extends MultiplayerSpawner
+
+func _enter_tree():
+	set_multiplayer_authority(1)
+"
 
 [node name="Main" type="Node3D"]
-
-[node name="player" parent="." instance=ExtResource("1_1pxvr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4755, 11.1601, -4.04709)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.20022, -0.268826, 0.942149, -0.0478431, 0.957791, 0.283456, -0.978582, -0.101829, 0.178908, 40.6751, 9.2125, 0.0728378)
@@ -19,15 +22,13 @@ data = {
 }
 metadata/_editor_floor_ = Vector3(0, 0, 0)
 
-[node name="Melee" parent="." instance=ExtResource("3_px5s6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 3, 7)
+[node name="Troops" type="Node" parent="."]
 
-[node name="Melee2" parent="." instance=ExtResource("3_px5s6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 3, 1)
+[node name="chester" parent="Troops" instance=ExtResource("2_lki5v")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 3, 11)
 
-[node name="Melee4" parent="." instance=ExtResource("3_px5s6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.00421, 3.00279, 4.94631)
-team = 0
-
-[node name="Melee3" parent="." instance=ExtResource("3_px5s6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 7)
+[node name="Spawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://units/melee/main.tscn", "res://units/test/test.tscn")
+spawn_path = NodePath("../Troops")
+spawn_limit = 30
+script = SubResource("GDScript_wanib")
