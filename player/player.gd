@@ -76,8 +76,7 @@ func handle_mouse_click():
 	
 	if trace.collider is GridMap:
 		handle_grid_select(trace.collider, trace.position)
-		
-	
+
 
 func handle_troop_select(troop : CharacterBody3D):
 	if !!selected_troop && (

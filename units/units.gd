@@ -1,10 +1,10 @@
 extends CharacterBody3D
 
-@export var attributes : TroopAttributes = TroopAttributes.new()
+@export var attributes : TroopAttributes
+@export var can_move : bool
+@export var can_attack : bool
 
-@export var can_move 			= true
-@export var can_attack 			= true
-# Peer id.
+
 @export var peer_id : int : 
 	set(value):
 		peer_id = value
@@ -18,6 +18,13 @@ func _ready():
 	set_physics_process(is_local)
 	set_process(is_local)
 	
+	#if !!attributes:
+	attributes = TroopAttributes.new()
+	attributes.attack_range = 1
+	attributes.move_range = 10
+	attributes.attack_damage = 5
+	attributes.health = 10
+		
 	attributes.owning_player = self.name.split("-")[0]
 	
 func take_damage(attacking_troop : CharacterBody3D):
