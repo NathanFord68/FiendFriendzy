@@ -2,13 +2,14 @@ extends Node3D
 
 enum MODE 	{ UNSELECTED, MOVE, ATTACK, ITEM }
 
+@export var raycast_length : float = 1000
+@export_range(0, 1) var mouse_sensitivity : float = .005
+
 var direction : Vector3 = Vector3()
 var camera_speed : float = .5
-
 var selected_mode : MODE = MODE.UNSELECTED
-@export var raycast_length : float = 1000
-
 var selected_troop : CharacterBody3D = null
+var camera_rotation : Vector2 = Vector2(0, 0)
 
 # Peer id.
 @export var peer_id : int : 
@@ -21,7 +22,7 @@ var selected_troop : CharacterBody3D = null
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	# Set local camera.
-	$Camera3D.current = peer_id == multiplayer.get_unique_id()
+	$Vision/SpringArm/Camera.current = peer_id == multiplayer.get_unique_id()
 	# Set process functions for current player.
 	var is_local = is_multiplayer_authority()
 	set_process_input(is_local)
@@ -30,7 +31,16 @@ func _ready():
 	
 
 func _input(event):
-	pass
+	if event is InputEventMouseButton && event.button_index == 4:
+		$Vision/SpringArm/Camera.fov = clamp($Vision/SpringArm/Camera.fov - 2, 100, 150)
+		
+	if event is InputEventMouseButton && event.button_index == 5:
+		$Vision/SpringArm/Camera.fov = clamp($Vision/SpringArm/Camera.fov + 2, 100, 150)
+	
+	if event is InputEventMouseMotion && Input.is_action_pressed("player_activate_camera_control"):
+		control_camera(event.relative * mouse_sensitivity)
+		#print(event)
+		
 		
 
 func _physics_process(delta):
@@ -38,7 +48,6 @@ func _physics_process(delta):
 		handle_mouse_click()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-# TODO add camera controls
 func _process(delta):
 	# Get player input wasd/arrows
 	if Input.is_action_pressed("player_left"):
@@ -61,8 +70,8 @@ func handle_mouse_click():
 	var mouse_pos = get_viewport().get_mouse_position()
 	
 	# Ray cast out from mouse position
-	var f = $Camera3D.project_ray_origin(mouse_pos)
-	var t = f + $Camera3D.project_ray_normal(mouse_pos) * raycast_length
+	var f = $Vision/SpringArm/Camera.project_ray_origin(mouse_pos)
+	var t = f + $Vision/SpringArm/Camera.project_ray_normal(mouse_pos) * raycast_length
 	
 	# Detect collisions and get troops
 	var space_state = get_world_3d().direct_space_state
@@ -211,3 +220,18 @@ func _check_range(to, from, range):
 				to.y >= from.y + range ||
 				to.y <= from.y - range
 			)
+
+func control_camera(mouse_movement: Vector2):
+	# Get the camera rotation
+	camera_rotation += mouse_movement
+	camera_rotation.y = clamp(camera_rotation.y, -1, 0)
+	
+	# Reset the basis for player and vision
+	transform.basis = Basis()
+	$Vision.transform.basis = Basis()
+	
+	# Set the rotation of the player
+	self.rotate_object_local(Vector3(0, 1, 0), -camera_rotation.x)
+	
+	# Set the pitch of the vision
+	$Vision.rotate_object_local(Vector3(1, 0, 0), -camera_rotation.y)

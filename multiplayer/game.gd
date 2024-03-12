@@ -35,7 +35,7 @@ func load_map():
 
 func spawn_player(id: int):
 	var player = preload("res://player/player.tscn").instantiate()
-	player.position = Vector3(0, 5, 0)
+	player.position = Vector3(0, 10, 0)
 	player.peer_id = str(id)
 	players.add_child(player, true)
 	seed_map()
