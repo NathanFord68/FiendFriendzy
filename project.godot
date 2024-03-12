@@ -24,6 +24,11 @@ Server="*res://multiplayer/server.gd"
 
 project/assembly_name="FiendFriendzy"
 
+[editor]
+
+version_control/plugin_name="GitPlugin"
+version_control/autoload_on_startup=true
+
 [input]
 
 player_right={
