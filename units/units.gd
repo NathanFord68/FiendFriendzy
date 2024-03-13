@@ -22,10 +22,8 @@ func _ready():
 	attributes.owning_player = self.name.split("-")[0]
 	
 func take_damage(attacking_troop : CharacterBody3D):
-	print("Entering take_damage")
 	self.attributes.health -= attacking_troop.attributes.attack_damage
 	
-	print("Setting the healthbar")
 	$HealthBar.update_health_bar(self.attributes.health)
 	
 	if attributes.health <= 0:

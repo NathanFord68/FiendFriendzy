@@ -1,0 +1,100 @@
+[gd_scene load_steps=2 format=3 uid="uid://dypif3aa0haon"]
+
+[sub_resource type="GDScript" id="GDScript_l2418"]
+script/source = "extends CanvasLayer
+
+signal move
+signal attack
+signal wait
+signal modify_turn
+
+func _ready():
+	modify_turn.connect(_handle_modify_turn)
+
+func toggle_mode_select(on : bool) -> void:
+	if on:
+		$ModeSelect.show()
+	else:
+		$ModeSelect.hide()
+
+func did_click_mode(mouse_pos : Vector2) -> bool:
+	return (
+		$ModeSelect.visible && 
+		mouse_pos.x <= $ModeSelect.size.x &&
+		mouse_pos.y <= $ModeSelect.size.y
+	)
+
+func _on_move_pressed():
+	move.emit()
+
+func _on_attack_pressed():
+	attack.emit()
+	
+func _on_item_pressed():
+	pass # Replace with function body.
+
+func _on_wait_pressed():
+	wait.emit()
+
+func _handle_modify_turn(our_turn : bool):
+	$TurnIndicator/Label.text = \"Your turn\" if our_turn else \"Opponents Turn\"
+"
+
+[node name="CanvasLayer" type="CanvasLayer"]
+script = SubResource("GDScript_l2418")
+
+[node name="ModeSelect" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(200, 275)
+offset_right = 200.0
+offset_bottom = 275.0
+
+[node name="Panel" type="Panel" parent="ModeSelect"]
+layout_mode = 2
+
+[node name="Move" type="Button" parent="ModeSelect/Panel"]
+layout_mode = 2
+offset_right = 200.0
+offset_bottom = 50.0
+text = "Move
+"
+
+[node name="Attack" type="Button" parent="ModeSelect/Panel"]
+layout_mode = 2
+offset_top = 75.0
+offset_right = 200.0
+offset_bottom = 125.0
+text = "Attack"
+
+[node name="Item" type="Button" parent="ModeSelect/Panel"]
+layout_mode = 2
+offset_top = 150.0
+offset_right = 200.0
+offset_bottom = 200.0
+text = "Item"
+
+[node name="Wait" type="Button" parent="ModeSelect/Panel"]
+layout_mode = 0
+offset_top = 225.0
+offset_right = 200.0
+offset_bottom = 275.0
+text = "Wait"
+
+[node name="TurnIndicator" type="PanelContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_bottom = 50.0
+grow_horizontal = 0
+
+[node name="Label" type="Label" parent="TurnIndicator"]
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[connection signal="pressed" from="ModeSelect/Panel/Move" to="." method="_on_move_pressed"]
+[connection signal="pressed" from="ModeSelect/Panel/Attack" to="." method="_on_attack_pressed"]
+[connection signal="pressed" from="ModeSelect/Panel/Item" to="." method="_on_item_pressed"]
+[connection signal="pressed" from="ModeSelect/Panel/Wait" to="." method="_on_wait_pressed"]

@@ -5,6 +5,10 @@ signal player_connected(peer_id, player_info)
 const PORT = 7000
 const MAX_CLIENTS = 3
 
+var blue_player : int
+var red_player : int
+var players_turn : int
+
 @onready var main : Node = get_tree().root.get_node("Main")
 @onready var players : Node = main.get_node("Players")
 
@@ -49,6 +53,11 @@ func seed_map():
 	if multiplayer.get_peers().size() != 2:
 		return
 	
+	# Assign players to team
+	blue_player = multiplayer.get_peers()[0]
+	players_turn = multiplayer.get_peers()[0]
+	red_player = multiplayer.get_peers()[1]
+	
 	# Loop over each peer and spawn their army
 	var spawner : MultiplayerSpawner = map.get_node("Spawner")
 	spawner.spawn_function = Callable(self, "_spawner_spawn_function")
@@ -58,11 +67,17 @@ func seed_map():
 				"name": str(multiplayer.get_peers()[i]),
 				"position": Vector3(1 + j * 2, 3, 1 + i * 2)
 			}), true)
-			#spawner.spawn({
-			#	"name": str(multiplayer.get_peers()[i]),
-			#	"position": Vector3(1 + j * 2, 3, 1 + i * 2)
-			#})
 	
+	# Alert players of turn order
+	for p in players.get_children():
+		if p.name.to_int() == 1: continue
+		p.inform_turn_information.rpc_id(p.name.to_int(), players_turn)
+
+func _handle_update_player_info(bp : int, rp: int, pt: int):
+	blue_player = bp
+	red_player = rp
+	players_turn = pt
+
 func _spawner_spawn_function(data : Variant) -> Node:
 	#var n = preload("res://units/test/test.tscn").instantiate()
 	var n = preload("res://units/melee/main.tscn").instantiate()

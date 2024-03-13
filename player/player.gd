@@ -12,6 +12,7 @@ var camera_speed : float = .5
 var selected_mode : MODE = MODE.UNSELECTED
 var selected_troop : CharacterBody3D = null
 var camera_rotation : Vector2 = Vector2(0, 0)
+var is_our_turn : bool = false
 
 # Peer id.
 @export var peer_id : int : 
@@ -30,6 +31,10 @@ func _ready():
 	set_process_input(is_local)
 	set_physics_process(is_local)
 	set_process(is_local)
+	
+	$PlayerHud.move.connect(_handle_move_local)
+	$PlayerHud.attack.connect(_handle_attack_local)
+	$PlayerHud.wait.connect(_handle_wait_local)
 	
 
 func _input(event):
@@ -65,13 +70,14 @@ func _physics_process(delta):
 	
 # TODO add logic to handle different types of mouse clicks
 func handle_mouse_click():
+	
+	if !is_our_turn:
+		return
+		
 	# Get mouse position
 	var mouse_pos = get_viewport().get_mouse_position()
 	
-	if $Main/ModeSelect.visible && (
-		mouse_pos.x <= $Main/ModeSelect.size.x &&
-		mouse_pos.y <= $Main/ModeSelect.size.y
-	):
+	if $PlayerHud.did_click_mode(mouse_pos):
 		return
 	
 	# Ray cast out from mouse position
@@ -99,6 +105,9 @@ func handle_troop_select(troop : CharacterBody3D):
 	
 	if !!selected_troop && troop.get_rid() == selected_troop.get_rid():
 		return
+		
+	if !troop.can_move && !troop.can_attack:
+		return
 	
 	if !!selected_troop:
 		# hide indiciator on previous troop
@@ -113,7 +122,7 @@ func handle_troop_select(troop : CharacterBody3D):
 	
 	selected_troop.get_node("%SelectionIndicator").show()
 	selected_mode = MODE.UNSELECTED
-	get_node("%ModeSelect").show()
+	$PlayerHud.toggle_mode_select(true)
 	
 func handle_enemy_select(enemy_troop : CharacterBody3D):
 	if !selected_troop:
@@ -121,7 +130,7 @@ func handle_enemy_select(enemy_troop : CharacterBody3D):
 	
 	if selected_mode != MODE.ATTACK:
 		return
-
+		
 	Server.handle_troop_attack.rpc_id(1, selected_troop.name, enemy_troop.name)
 
 	# Clean up from attack
@@ -134,6 +143,8 @@ func handle_grid_select(grid : GridMap, select_pos: Vector3):
 	if !selected_troop:
 		return
 
+	if selected_mode != MODE.MOVE:
+		return
 	# Translate selected troop to coordinate
 	var troop_map_pos = grid.local_to_map(selected_troop.position)
 	#var move : Vector3 = grid.map_to_local(grid.local_to_map(select_pos)) - grid.map_to_local(troop_map_pos) 
@@ -144,11 +155,11 @@ func handle_grid_select(grid : GridMap, select_pos: Vector3):
 		# Dehighlight selected squares
 		handle_grid_highlight(-1, selected_troop.attributes.move_range)
 
-		Server.update_troop_location.rpc_id(1, selected_troop.name, move, selected_troop.peer_id)
+		Server.handle_troop_move.rpc_id(1, selected_troop.name, move, selected_troop.peer_id)
 		
 		selected_mode = MODE.UNSELECTED
 
-func _on_move_button_down():
+func _handle_move_local():
 	if selected_mode == MODE.MOVE:
 		return 
 	# Check if troop can move
@@ -165,7 +176,7 @@ func _on_move_button_down():
 	# Highlight squares
 	handle_grid_highlight(1, selected_troop.attributes.move_range)
 
-func _on_attack_button_down():
+func _handle_attack_local():
 	if selected_mode == MODE.ATTACK:
 		return 
 	# Check if the troop can attack
@@ -179,11 +190,20 @@ func _on_attack_button_down():
 	# Set the mode to attack
 	selected_mode = MODE.ATTACK
 	handle_grid_highlight(1, selected_troop.attributes.attack_range)
-
-func _on_item_button_down():
-	if selected_mode == MODE.ITEM:
+	
+func _handle_wait_local():
+	if !selected_troop:
 		return
-	selected_mode = MODE.ITEM
+	
+	# toggle their actions off
+	Server.handle_troop_wait.rpc_id(1, selected_troop.name)
+	
+	# Hide their indicator
+	selected_troop.get_node("%SelectionIndicator").hide()
+	$PlayerHud.toggle_mode_select(false)
+	
+	selected_troop = null
+	
 	
 func handle_grid_highlight(mesh_increment : int, range : int):
 	# Cast out to get reference to grid
@@ -237,3 +257,10 @@ func control_camera(mouse_movement: Vector2):
 	
 	# Set the pitch of the vision
 	$Vision.rotate_object_local(Vector3(1, 0, 0), -camera_rotation.y)
+
+@rpc("any_peer", "call_remote", "reliable")
+func inform_turn_information(pt: int):
+	is_our_turn = pt == multiplayer.get_unique_id()
+	$PlayerHud.modify_turn.emit(is_our_turn)
+
+

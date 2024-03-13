@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://c7cx0ibtswkwt"]
+[gd_scene load_steps=4 format=3 uid="uid://c7cx0ibtswkwt"]
 
 [ext_resource type="Script" path="res://player/player.gd" id="1_0o48o"]
+[ext_resource type="PackedScene" uid="uid://dypif3aa0haon" path="res://resources/player_hud.tscn" id="2_aa7n2"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2eiay"]
 properties/0/path = NodePath(".:peer_id")
@@ -10,40 +11,6 @@ properties/0/replication_mode = 0
 [node name="Character" type="Node3D"]
 rotation_edit_mode = 2
 script = ExtResource("1_0o48o")
-
-[node name="Main" type="Node3D" parent="."]
-
-[node name="ModeSelect" type="PanelContainer" parent="Main"]
-unique_name_in_owner = true
-visible = false
-offset_right = 204.0
-offset_bottom = 233.0
-
-[node name="Panel" type="Panel" parent="Main/ModeSelect"]
-layout_mode = 2
-
-[node name="Move" type="Button" parent="Main/ModeSelect/Panel"]
-layout_mode = 2
-offset_right = 204.0
-offset_bottom = 56.0
-text = "Move
-"
-
-[node name="Attack" type="Button" parent="Main/ModeSelect/Panel"]
-layout_mode = 2
-offset_left = -1.0
-offset_top = 77.0
-offset_right = 204.0
-offset_bottom = 154.0
-text = "Attack"
-
-[node name="Item" type="Button" parent="Main/ModeSelect/Panel"]
-layout_mode = 2
-offset_left = 2.0
-offset_top = 160.0
-offset_right = 204.0
-offset_bottom = 235.0
-text = "Item"
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_2eiay")
@@ -60,6 +27,4 @@ transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0, 
 fov = 100.0
 near = 1.0
 
-[connection signal="button_down" from="Main/ModeSelect/Panel/Move" to="." method="_on_move_button_down"]
-[connection signal="button_down" from="Main/ModeSelect/Panel/Attack" to="." method="_on_attack_button_down"]
-[connection signal="button_down" from="Main/ModeSelect/Panel/Item" to="." method="_on_item_button_down"]
+[node name="PlayerHud" parent="." instance=ExtResource("2_aa7n2")]
