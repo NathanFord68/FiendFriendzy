@@ -1,4 +1,6 @@
-[gd_scene load_steps=8 format=3 uid="uid://olw4xcu4dndf"]
+[gd_scene load_steps=10 format=3 uid="uid://olw4xcu4dndf"]
+
+[ext_resource type="PackedScene" uid="uid://bpseulsd7djs7" path="res://resources/HealthBar.tscn" id="1_mkpc6"]
 
 [sub_resource type="GDScript" id="GDScript_un83l"]
 script/source = "extends \"res://units/units.gd\"
@@ -30,6 +32,15 @@ material = SubResource("StandardMaterial3D_rskkp")
 properties/0/path = NodePath(".:position")
 properties/0/spawn = true
 properties/0/replication_mode = 1
+properties/1/path = NodePath(".:can_move")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:can_attack")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_5q61p"]
+viewport_path = NodePath("SubViewport")
 
 [node name="Melee" type="CharacterBody3D"]
 script = SubResource("GDScript_un83l")
@@ -55,3 +66,7 @@ mesh = SubResource("PrismMesh_n78ur")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_hq5no")
+
+[node name="HealthBar" parent="." instance=ExtResource("1_mkpc6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.18927, 0)
+texture = SubResource("ViewportTexture_5q61p")

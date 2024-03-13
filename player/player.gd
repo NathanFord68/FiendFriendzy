@@ -3,6 +3,8 @@ extends Node3D
 enum MODE 	{ UNSELECTED, MOVE, ATTACK, ITEM }
 
 @export var raycast_length : float = 1000
+const MIN_CAMERA_ZOOM : float = 60
+const MAX_CAMERA_ZOOM : float = 180
 @export_range(0, 1) var mouse_sensitivity : float = .005
 
 var direction : Vector3 = Vector3()
@@ -32,10 +34,10 @@ func _ready():
 
 func _input(event):
 	if event is InputEventMouseButton && event.button_index == 4:
-		$Vision/SpringArm/Camera.fov = clamp($Vision/SpringArm/Camera.fov - 2, 100, 150)
+		$Vision/SpringArm/Camera.fov = clamp($Vision/SpringArm/Camera.fov - 2, MIN_CAMERA_ZOOM, MAX_CAMERA_ZOOM)
 		
 	if event is InputEventMouseButton && event.button_index == 5:
-		$Vision/SpringArm/Camera.fov = clamp($Vision/SpringArm/Camera.fov + 2, 100, 150)
+		$Vision/SpringArm/Camera.fov = clamp($Vision/SpringArm/Camera.fov + 2, MIN_CAMERA_ZOOM, MAX_CAMERA_ZOOM)
 	
 	if event is InputEventMouseMotion && Input.is_action_pressed("player_activate_camera_control"):
 		control_camera(event.relative * mouse_sensitivity)
@@ -88,9 +90,7 @@ func handle_mouse_click():
 
 
 func handle_troop_select(troop : CharacterBody3D):
-	if !!selected_troop && (
-		troop.attributes.owning_player != selected_troop.attributes.owning_player
-	):
+	if troop.attributes.owning_player != str(multiplayer.get_unique_id()):
 		handle_enemy_select(troop)
 		return
 	
@@ -118,11 +118,10 @@ func handle_enemy_select(enemy_troop : CharacterBody3D):
 	
 	if selected_mode != MODE.ATTACK:
 		return
-	
-	enemy_troop.take_damage(selected_troop)
+
+	Server.handle_troop_attack.rpc_id(1, selected_troop.name, enemy_troop.name)
 
 	# Clean up from attack
-	selected_troop.can_attack = false
 	handle_grid_highlight(-1, selected_troop.attributes.attack_range)
 	selected_mode = MODE.UNSELECTED
 		

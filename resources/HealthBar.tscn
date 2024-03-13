@@ -1,0 +1,47 @@
+[gd_scene load_steps=6 format=3 uid="uid://bpseulsd7djs7"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_upcho"]
+viewport_path = NodePath("SubViewport")
+
+[sub_resource type="GDScript" id="GDScript_tx1ks"]
+script/source = "extends Sprite3D
+
+func update_health_bar(val : float) -> void:
+	$SubViewport/HealthBar2D.value = val	
+"
+
+[sub_resource type="Gradient" id="Gradient_v6ln7"]
+colors = PackedColorArray(1, 0, 0, 1, 0, 1, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_pgrr4"]
+gradient = SubResource("Gradient_v6ln7")
+width = 50
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_n43ft"]
+properties/0/path = NodePath("SubViewport/HealthBar2D:value")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+
+[node name="HealthBar" type="Sprite3D"]
+transform = Transform3D(0.996904, 0, 0, 0, 0.996904, 0, 0, 0, 0.996904, 0, 1.15829, 0)
+billboard = 1
+texture = SubResource("ViewportTexture_upcho")
+script = SubResource("GDScript_tx1ks")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+transparent_bg = true
+size = Vector2i(50, 10)
+
+[node name="HealthBar2D" type="TextureProgressBar" parent="SubViewport"]
+custom_minimum_size = Vector2(50, 10)
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 42.0
+offset_bottom = 18.0
+max_value = 10.0
+value = 10.0
+nine_patch_stretch = true
+texture_progress = SubResource("GradientTexture1D_pgrr4")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_n43ft")
