@@ -48,9 +48,6 @@ func _input(event):
 func _physics_process(delta):
 	if Input.is_action_just_pressed("player_click"):
 		handle_mouse_click()
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
 	# Get player input wasd/arrows
 	if Input.is_action_pressed("player_left"):
 		direction.x = -1
@@ -70,6 +67,12 @@ func _process(delta):
 func handle_mouse_click():
 	# Get mouse position
 	var mouse_pos = get_viewport().get_mouse_position()
+	
+	if $Main/ModeSelect.visible && (
+		mouse_pos.x <= $Main/ModeSelect.size.x &&
+		mouse_pos.y <= $Main/ModeSelect.size.y
+	):
+		return
 	
 	# Ray cast out from mouse position
 	var f = $Vision/SpringArm/Camera.project_ray_origin(mouse_pos)
@@ -207,8 +210,8 @@ func handle_grid_highlight(mesh_increment : int, range : int):
 	var standing_grid = grid.local_to_map(Vector3(selected_troop.global_position.x, 1, selected_troop.global_position.z))
 	
 	# Iterate through and increase the emmision
-	for i in range(0 - range, range):
-		for j in range(0 - range, range):
+	for i in range(0 - range, range + 1):
+		for j in range(0 - range, range + 1):
 			var c = standing_grid + Vector3i(i, 0, j)
 			grid.set_cell_item(c, grid.get_cell_item(c) + mesh_increment)
 			
