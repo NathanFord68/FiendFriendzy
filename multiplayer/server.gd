@@ -36,9 +36,10 @@ func _has_actions_left(id: int) -> void:
 	# Get the troops
 	var troops = map.get_node("Troops").get_children()
 	
+	
 	# Iterate through
 	for t : CharacterBody3D in troops:
-		# Do nothing if the caller is not the owner
+		# If the caller is not the owner, increment enemy troops and continue
 		if str(id) != t.name.split("-")[0]:
 			continue
 		
@@ -47,7 +48,7 @@ func _has_actions_left(id: int) -> void:
 			# Break if they do
 			b_has_actions_left = true
 			break
-	
+
 	if b_has_actions_left: return
 
 	for t : CharacterBody3D in troops:

@@ -5,9 +5,14 @@ signal player_connected(peer_id, player_info)
 const PORT = 7000
 const MAX_CLIENTS = 3
 
+const NUMBER_TROOPS_TO_SEED : int = 2
+
 var blue_player : int
+var blue_troop_count : = NUMBER_TROOPS_TO_SEED
 var red_player : int
+var red_troop_count : int = NUMBER_TROOPS_TO_SEED
 var players_turn : int
+signal game_over
 
 @onready var main : Node = get_tree().root.get_node("Main")
 @onready var players : Node = main.get_node("Players")
@@ -21,6 +26,7 @@ func _ready():
 	main.add_child(menu)
 	
 	multiplayer.peer_connected.connect(spawn_player)
+	game_over.connect(_handle_game_over)
 
 func load_map():
 	# Free old stuff.
@@ -44,6 +50,9 @@ func spawn_player(id: int):
 	players.add_child(player, true)
 	seed_map()
 
+func _handle_game_over():
+	print("Game is over")
+
 func seed_map():
 	# if not server return
 	if multiplayer.get_unique_id() != 1:
@@ -62,7 +71,7 @@ func seed_map():
 	var spawner : MultiplayerSpawner = map.get_node("Spawner")
 	spawner.spawn_function = Callable(self, "_spawner_spawn_function")
 	for i in range(0, multiplayer.get_peers().size()):
-		for j in range(0, 5):
+		for j in range(0, NUMBER_TROOPS_TO_SEED):
 			map.get_node("Troops").add_child(_spawner_spawn_function({
 				"name": str(multiplayer.get_peers()[i]),
 				"position": Vector3(1 + j * 2, 3, 1 + i * 2)
