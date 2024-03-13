@@ -19,6 +19,7 @@ signal game_over
 
 var map : Node = null
 var menu : Node = null
+var credits : Node = null
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -34,6 +35,8 @@ func load_map():
 		map.queue_free()
 	if menu != null:
 		menu.queue_free()
+	if credits != null:
+		credits.queue_free()
 	
 	# Spawn map.
 	map = preload("res://maps/level.tscn").instantiate()
@@ -51,7 +54,16 @@ func spawn_player(id: int):
 	seed_map()
 
 func _handle_game_over():
-	print("Game is over")
+	# Free old stuff.
+	if map != null:
+		map.queue_free()
+	if menu != null:
+		menu.queue_free()
+	if credits != null:
+		credits.queue_free()
+	
+	credits = preload("res://maps/game_over.tscn").instantiate()
+	main.add_child(credits)
 
 func seed_map():
 	# if not server return
