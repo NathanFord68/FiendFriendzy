@@ -5,7 +5,6 @@
 [sub_resource type="GDScript" id="GDScript_un83l"]
 script/source = "extends \"res://units/units.gd\"
 
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	super._ready()

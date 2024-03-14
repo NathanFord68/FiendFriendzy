@@ -26,6 +26,19 @@ func take_damage(attacking_troop : CharacterBody3D):
 	
 	$HealthBar.update_health_bar(self.attributes.health)
 	
-	if attributes.health <= 0:
-		self.queue_free()
-		print(str(self.get_rid())+ " has died")
+	if attributes.health > 0: return
+	
+	self.queue_free()
+	print(str(self.name)+ " has died")
+	# Who owns me
+	var owner = "blue" if str(Game.blue_player) == self.name.split("-")[0] else "red"
+	
+	# Decrement their troop count
+	if owner == "blue":
+		Game.blue_troop_count -= 1
+	else:
+		Game.red_troop_count -= 1
+		
+	if Game.blue_troop_count == 0 || Game.red_troop_count == 0:
+		Game.game_over.emit()
+		

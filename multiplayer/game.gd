@@ -5,15 +5,21 @@ signal player_connected(peer_id, player_info)
 const PORT = 7000
 const MAX_CLIENTS = 3
 
+const NUMBER_TROOPS_TO_SEED : int = 2
+
 var blue_player : int
+var blue_troop_count : = NUMBER_TROOPS_TO_SEED
 var red_player : int
+var red_troop_count : int = NUMBER_TROOPS_TO_SEED
 var players_turn : int
+signal game_over
 
 @onready var main : Node = get_tree().root.get_node("Main")
 @onready var players : Node = main.get_node("Players")
 
 var map : Node = null
 var menu : Node = null
+var credits : Node = null
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -21,6 +27,7 @@ func _ready():
 	main.add_child(menu)
 	
 	multiplayer.peer_connected.connect(spawn_player)
+	game_over.connect(handle_game_over)
 
 func load_map():
 	# Free old stuff.
@@ -28,6 +35,8 @@ func load_map():
 		map.queue_free()
 	if menu != null:
 		menu.queue_free()
+	if credits != null:
+		credits.queue_free()
 	
 	# Spawn map.
 	map = preload("res://maps/level.tscn").instantiate()
@@ -43,6 +52,32 @@ func spawn_player(id: int):
 	player.peer_id = str(id)
 	players.add_child(player, true)
 	seed_map()
+
+func remove_player(id: int):
+	if not players.has_node(str(id)):
+		return
+	players.get_node(str(id)).queue_free()
+
+@rpc("any_peer", "call_local", "reliable")
+func handle_game_over():
+	# Free old stuff.
+	if map != null:
+		map.queue_free()
+	if menu != null:
+		menu.queue_free()
+	if credits != null:
+		credits.queue_free()
+	
+	for p in multiplayer.get_peers():
+		if p != 1:
+			handle_game_over.rpc_id(p)
+		
+	
+	for p : Node in players.get_children():
+		remove_player(p.name.to_int())
+	
+	credits = preload("res://maps/game_over.tscn").instantiate()
+	main.add_child(credits)
 
 func seed_map():
 	# if not server return
@@ -62,7 +97,7 @@ func seed_map():
 	var spawner : MultiplayerSpawner = map.get_node("Spawner")
 	spawner.spawn_function = Callable(self, "_spawner_spawn_function")
 	for i in range(0, multiplayer.get_peers().size()):
-		for j in range(0, 5):
+		for j in range(0, NUMBER_TROOPS_TO_SEED):
 			map.get_node("Troops").add_child(_spawner_spawn_function({
 				"name": str(multiplayer.get_peers()[i]),
 				"position": Vector3(1 + j * 2, 3, 1 + i * 2)
