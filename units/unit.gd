@@ -1,6 +1,5 @@
 class_name Unit extends CharacterBody3D
 
-@export var attributes : TroopAttributes
 @export var can_move : bool = true
 @export var can_attack : bool = true
 
@@ -18,18 +17,16 @@ func _ready():
 	set_physics_process(is_local)
 	set_process(is_local)
 	
-	attributes = TroopAttributes.new()
-	attributes.owning_player = self.name.split("-")[0]
+	$Attributes.owning_player = self.name.split("-")[0]
 	
 func take_damage(attacking_troop : CharacterBody3D):
-	self.attributes.health -= attacking_troop.attributes.attack_damage
+	$Attributes.health -= attacking_troop.get_node("Attributes").attack_damage
 	
-	$HealthBar.update_health_bar(self.attributes.health)
+	$HealthBar.update_health_bar($Attributes.health)
 	
-	if attributes.health > 0: return
+	if $Attributes.health > 0: return
 	
 	self.queue_free()
-	print(str(self.name)+ " has died")
 	# Who owns me
 	var owner = "blue" if str(Game.blue_player) == self.name.split("-")[0] else "red"
 	

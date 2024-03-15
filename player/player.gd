@@ -99,7 +99,7 @@ func handle_mouse_click():
 
 
 func handle_troop_select(troop : CharacterBody3D):
-	if troop.attributes.owning_player != str(multiplayer.get_unique_id()):
+	if troop.get_node("Attributes").owning_player != str(multiplayer.get_unique_id()):
 		handle_enemy_select(troop)
 		return
 	
@@ -115,7 +115,7 @@ func handle_troop_select(troop : CharacterBody3D):
 	
 	if !!selected_troop && ( 
 		selected_mode == MODE.ATTACK || selected_mode== MODE.MOVE ):
-		handle_grid_highlight(-1, selected_troop.attributes.attack_range if selected_mode == MODE.ATTACK else selected_troop.attributes.move_range)
+		handle_grid_highlight(-1, selected_troop.get_node("Attributes").attack_range if selected_mode == MODE.ATTACK else selected_troop.attributes.move_range)
 	
 	# Reasign troop
 	selected_troop = troop
@@ -134,7 +134,7 @@ func handle_enemy_select(enemy_troop : CharacterBody3D):
 	Server.handle_troop_attack.rpc_id(1, selected_troop.name, enemy_troop.name)
 
 	# Clean up from attack
-	handle_grid_highlight(-1, selected_troop.attributes.attack_range)
+	handle_grid_highlight(-1, selected_troop.get_node("Attributes").attack_range)
 	selected_mode = MODE.UNSELECTED
 		
 
@@ -151,9 +151,9 @@ func handle_grid_select(grid : GridMap, select_pos: Vector3):
 	var move : Vector3 = grid.map_to_local(grid.local_to_map(select_pos))
 	move.y = 3
 
-	if _check_range(move, troop_map_pos, selected_troop.attributes.move_range):
+	if _check_range(move, troop_map_pos, selected_troop.get_node("Attributes").move_range):
 		# Dehighlight selected squares
-		handle_grid_highlight(-1, selected_troop.attributes.move_range)
+		handle_grid_highlight(-1, selected_troop.get_node("Attributes").move_range)
 
 		Server.handle_troop_move.rpc_id(1, selected_troop.name, move, selected_troop.peer_id)
 		
@@ -168,13 +168,13 @@ func _handle_move_local():
 
 	# De-highlight squares if we're coming from an attack mode
 	if selected_mode == MODE.ATTACK:
-		handle_grid_highlight(-1, selected_troop.attributes.attack_range)
+		handle_grid_highlight(-1, selected_troop.get_node("Attributes").attack_range)
 
 	# Change the mode
 	selected_mode = MODE.MOVE
 	
 	# Highlight squares
-	handle_grid_highlight(1, selected_troop.attributes.move_range)
+	handle_grid_highlight(1, selected_troop.get_node("Attributes").move_range)
 
 func _handle_attack_local():
 	if selected_mode == MODE.ATTACK:
@@ -185,11 +185,11 @@ func _handle_attack_local():
 	
 	# De-highlight if we're coming from movement
 	if selected_mode == MODE.MOVE:
-		handle_grid_highlight(-1, selected_troop.attributes.move_range)
+		handle_grid_highlight(-1, selected_troop.get_node("Attributes").move_range)
 		
 	# Set the mode to attack
 	selected_mode = MODE.ATTACK
-	handle_grid_highlight(1, selected_troop.attributes.attack_range)
+	handle_grid_highlight(1, selected_troop.get_node("Attributes").attack_range)
 	
 func _handle_wait_local():
 	if !selected_troop:

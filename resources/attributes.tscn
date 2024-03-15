@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6kpnbkt4v1jg"]
+
+[sub_resource type="GDScript" id="GDScript_vu72u"]
+script/source = "extends Node
+
+@export var health : int
+@export var attack_damage : int
+@export var attack_range : int
+@export var move_range : int
+var owning_player : String
+
+"
+
+[node name="Attributes" type="Node"]
+script = SubResource("GDScript_vu72u")

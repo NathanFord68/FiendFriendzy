@@ -115,7 +115,7 @@ func _handle_update_player_info(bp : int, rp: int, pt: int):
 
 func _spawner_spawn_function(data : Variant) -> Node:
 	#var n = preload("res://units/test/test.tscn").instantiate()
-	var n = preload("res://units/melee/main.tscn").instantiate()
+	var n = preload("res://units/melee/melee.tscn").instantiate()
 	n.name = data.name + "-Melee"
 	n.position = data.position
 	return n
